@@ -8,7 +8,8 @@ typedef TPt<TWNet> PWNet;
 void PreprocessTransitionProbs(PWNet& InNet, const double& ParamP, const double& ParamQ, const bool& verbose);
 
 ///Simulates one walk and writes it into Walk vector
-void SimulateWalk(PWNet& InNet, int64 StartNId, const int& WalkLen, TRnd& Rnd, TIntV& Walk);
+//void SimulateWalk(PWNet& InNet, int64 StartNId, const int& WalkLen, TRnd& Rnd, TIntV& Walk);
+void SimulateWalk(PWNet& InNet, int64 StartNId, const int& WalkLen, TRnd& Rnd, TIntV& Walk, const double& ParamP, const double& ParamQ, TStrIntVFltVPrH& NTTabelCache);
 
 //Predicts approximate memory required for preprocessing the graph
 int64 PredictMemoryRequirements(PWNet& InNet);
