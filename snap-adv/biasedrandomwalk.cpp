@@ -47,46 +47,6 @@ void GetNodeAlias(TFltV& PTblV, TIntVFltVPr& NTTable) {
 
 }
 
-TIntVFltVPr GetNTTable(PWNet& InNet, int64 Dst, int64 Src, const double& ParamP, const double& ParamQ, TStrIntVFltVPrH& NTTabelCache) {
-  TStr key = TStr::Fmt("%lld,%lld", Dst, Src);
-  if(!NTTabelCache.IsKey(key)) {
-    if (NTTabelCache.Len() >= 500000) {
-      NTTabelCache.Clr();
-    }
-    TWNet::TNodeI DstNode = InNet->GetNI(Dst);
-    TWNet::TNodeI SrcNode = InNet->GetNI(Src);
-    THash <TInt, TBool> SrcNbrH;
-    for (int64 i = 0; i < SrcNode.GetOutDeg(); i++) {
-      SrcNbrH.AddKey(SrcNode.GetNbrNId(i));
-    }
-    double Psum = 0;
-    TFltV PTable;
-    for (int64 i = 0; i < DstNode.GetOutDeg(); i++) {
-      int64 NbrId = DstNode.GetNbrNId(i);
-      TFlt Weight;
-      if (!(InNet->GetEDat(Dst, NbrId, Weight))){ continue; }
-      if (NbrId==Src) {
-        PTable.Add(Weight / ParamP);
-        Psum += Weight / ParamP;
-      } else if (SrcNbrH.IsKey(NbrId)) {
-        PTable.Add(Weight);
-        Psum += Weight;
-      } else {
-        PTable.Add(Weight / ParamQ);
-        Psum += Weight / ParamQ;
-      }
-    }
-    //Normalizing table
-    for (int64 i = 0; i < DstNode.GetOutDeg(); i++) {
-      PTable[i] /= Psum;
-    }
-    // must set default value "TIntVFltVPr(TIntV(1), TFltV(1))"
-    NTTabelCache.AddDat(key, TPair<TIntV,TFltV>(TIntV(DstNode.GetOutDeg()), TFltV(DstNode.GetOutDeg())));
-    GetNodeAlias(PTable, NTTabelCache.GetDat(key));
-  }
-  return NTTabelCache.GetDat(key);
-}
-
 void GetNTTable(PWNet& InNet, int64 Dst, int64 Src, const double& ParamP, const double& ParamQ, TIntVFltVPr& NTTable) {
     TWNet::TNodeI DstNode = InNet->GetNI(Dst);
     TWNet::TNodeI SrcNode = InNet->GetNI(Src);
@@ -199,7 +159,8 @@ int64 PredictMemoryRequirements(PWNet& InNet) {
 }
 
 //Simulates a random walk
-void SimulateWalk(PWNet& InNet, int64 StartNId, const int& WalkLen, TRnd& Rnd, TIntV& WalkV, const double& ParamP, const double& ParamQ, TStrIntVFltVPrH& NTTabelCache) {
+//void SimulateWalk(PWNet& InNet, int64 StartNId, const int& WalkLen, TRnd& Rnd, TIntV& WalkV, const double& ParamP, const double& ParamQ, TStrIntVFltVPrH& NTTabelCache) {
+void SimulateWalk(PWNet& InNet, int64 StartNId, const int& WalkLen, TRnd& Rnd, TIntV& WalkV, const double& ParamP, const double& ParamQ) {
   WalkV.Add(StartNId);
   if (WalkLen == 1) { return; }
   if (InNet->GetNI(StartNId).GetOutDeg() == 0) { return; }
@@ -208,7 +169,7 @@ void SimulateWalk(PWNet& InNet, int64 StartNId, const int& WalkLen, TRnd& Rnd, T
     int64 Dst = WalkV.Last();
     int64 Src = WalkV.LastLast();
     if (InNet->GetNI(Dst).GetOutDeg() == 0) { return; }
-    TIntVFltVPr NTTable = TPair<TIntV,TFltV>(TIntV(InNet->GetNI(Dst).GetOutDeg()), TFltV(InNet->GetNI(Src).GetOutDeg()));
+    TIntVFltVPr NTTable = TPair<TIntV,TFltV>(TIntV(InNet->GetNI(Dst).GetOutDeg()), TFltV(InNet->GetNI(Dst).GetOutDeg()));
     GetNTTable(InNet, Dst, Src, ParamP, ParamQ, NTTable);
     int64 Next = AliasDrawInt(NTTable, Rnd);
     WalkV.Add(InNet->GetNI(Dst).GetNbrNId(Next));

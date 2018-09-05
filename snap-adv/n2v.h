@@ -12,7 +12,13 @@ void node2vec(PWNet& InNet, const double& ParamP, const double& ParamQ,
   const int& Dimensions, const int& WalkLen, const int& NumWalks,
   const int& WinSize, const int& Iter, const bool& Verbose,
   const bool& OutputWalks, TVVec<TInt, int64>& WalksVV,
-  TIntFltVH& EmbeddingsHV); 
+  TIntFltVH& EmbeddingsHV);
+
+void node2vec(PWNet& InNet, const double& ParamP, const double& ParamQ,
+              const int& Dimensions, const int& WalkLen, const int& NumWalks,
+              const int& WinSize, const int& Iter, const bool& Verbose,
+              const bool& OutputWalks, TVVec<TInt, int64>& WalksVV,
+              TIntFltVH& EmbeddingsHV, TStr& OutFile);
 
 /// Version without walk output flag. For backward compatibility.
 void node2vec(PWNet& InNet, const double& ParamP, const double& ParamQ,
